@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cronopios en el aula</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+<meta name="theme-color" content="#BE185D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cronopios en el aula">
+<meta property="og:title" content="Cronopios en el aula">
+<meta property="og:description" content="Bienvenidos a este espacio de encuentro con las palabras.">
+<meta property="og:image" content="og-image.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</head>
+<body>
+
+<script>
+const CONFIG = {
+  SHEET_CSV_URL:      "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ86-hDtIXbLWtY_UphudPxjo2fkEFnKHMf6neLyHHxpnbTDpp6YO7TLJAF24yHIg/pub?output=csv",
+  EMAILJS_PUBLIC_KEY: "BVgDA3L5k06Uq-fsE",
+  EMAILJS_SERVICE_ID: "service_y4r34ou",
+  EMAILJS_TEMPLATE_ID:"template_ksj0vi7",
+  TITULO_PORTAL:     "Cronopios en el aula",
+  TAGLINE_PORTAL:    "Bienvenidos a este espacio de encuentro con las palabras. Aquí encontrarán lecturas, actividades, materiales de estudio y propuestas para descubrir que leer, escribir y pensar son formas de comprender el mundo y también de transformarlo.",
+  BOTON_CONTACTO:    "Contactá a la profe"
+};
+</script>
+
+<style>
+:root{
+  --rose:       #EC4899;
+  --rose2:      #BE185D;
+  --rose-pale:  #FCE7F3;
+  --sky:        #BAE6FD;
+  --sky2:       #38BDF8;
+  --neutral:    #CBD5E1;
+  --neutral2:   #94A3B8;
+  --bg:         #FDF8FB;
+  --card:       #FFFFFF;
+  --ink:        #1E1B2E;
+  --ink-soft:   #64748B;
+  --border:     #F0D6E8;
+  --shadow:     0 8px 32px rgba(236,72,153,.13);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  background-image:radial-gradient(circle at 1px 1px, rgba(236,72,153,0.05) 1px, transparent 0);
+  background-size:24px 24px;
+  color:var(--ink);
+  font-family:'Nunito Sans',sans-serif;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{font-family:'Nunito',sans-serif;}
+button{font-family:'Nunito Sans',sans-serif;cursor:pointer;}
+a{color:var(--rose);}
+
+/* ── LOGIN ── */
+#login-screen{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:28px 20px;
+}
+.login-card{
+  background:var(--card);border-radius:20px;
+  padding:40px 32px 32px;
+  max-width:400px;width:100%;
+  box-shadow:var(--shadow);
+  border:1px solid var(--border);
+  position:relative;overflow:hidden;
+}
+.login-card::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:5px;
+  background:linear-gradient(90deg,var(--rose) 0%,var(--sky2) 100%);
+}
+.login-eyebrow{
+  font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--rose);margin-bottom:8px;
+}
+.login-title{
+  font-size:28px;font-weight:800;
+  color:var(--ink);line-height:1.2;margin-bottom:10px;
+}
+.login-sub{
+  font-size:13px;color:var(--ink-soft);
+  line-height:1.65;margin-bottom:24px;
+}
+.field{margin-bottom:15px;}
+.field label{
+  display:block;font-size:13px;font-weight:700;
+  color:var(--ink);margin-bottom:6px;
+}
+select,input[type=password],input[type=text],textarea{
+  width:100%;font-family:'Nunito Sans',sans-serif;
+  font-size:14.5px;padding:11px 14px;
+  border:1.5px solid var(--border);border-radius:10px;
+  background:#fff;color:var(--ink);
+}
+select:focus,input:focus,textarea:focus{
+  outline:2px solid var(--rose);outline-offset:1px;border-color:var(--rose);
+}
+.btn-primary{
+  width:100%;background:var(--rose);color:#fff;
+  border:none;border-radius:10px;padding:13px;
+  font-size:15px;font-weight:800;margin-top:4px;
+  transition:background .15s;
+}
+.btn-primary:hover{background:var(--rose2);}
+.error-msg{color:var(--rose2);font-size:13px;font-weight:700;margin-top:10px;min-height:16px;}
+.loading-msg{color:var(--ink-soft);font-size:13px;margin-top:10px;}
+
+.login-quote{
+  max-width:400px;width:100%;
+  text-align:center;padding:18px 16px 0;
+  font-size:12px;font-style:italic;
+  color:var(--neutral2);line-height:1.6;
+}
+.powered-by{
+  margin-top:20px;font-size:11px;color:var(--neutral2);
+}
+.powered-by a{color:var(--rose);text-decoration:none;font-weight:700;}
+.powered-by a:hover{text-decoration:underline;}
+
+/* ── MAIN ── */
+#main-screen{display:none;min-height:100vh;flex-direction:column;}
+#main-screen.visible{display:flex;}
+
+header.topbar{
+  background:linear-gradient(135deg,var(--rose2) 0%,var(--rose) 100%);
+  padding:16px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;flex-wrap:wrap;flex:0 0 auto;
+}
+.topbar-left .label{
+  font-size:10px;font-weight:800;letter-spacing:.08em;
+  text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:2px;
+}
+.topbar-left h2{font-size:18px;font-weight:800;color:#fff;margin:0;}
+.logout-btn{
+  background:rgba(255,255,255,.15);
+  border:1.5px solid rgba(255,255,255,.4);
+  color:#fff;font-size:13px;font-weight:700;
+  padding:7px 16px;border-radius:8px;
+}
+.logout-btn:hover{background:rgba(255,255,255,.25);}
+
+.tabs-strip{
+  display:flex;flex-wrap:wrap;gap:8px;
+  padding:16px 18px 12px;
+  background:var(--bg);border-bottom:1px solid var(--border);
+  flex:0 0 auto;
+}
+.tab-folder{
+  background:#fff;border:1.5px solid var(--border);
+  padding:8px 16px;border-radius:20px;
+  font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;
+  color:var(--ink-soft);transition:all .15s;
+}
+.tab-folder.active{background:var(--rose);border-color:var(--rose);color:#fff;}
+.tab-folder:hover:not(.active){border-color:var(--rose);color:var(--rose);}
+
+main.content{background:#fff;flex:1 1 auto;padding:24px 18px 90px;}
+.material-list{
+  max-width:720px;margin:0 auto;
+  display:flex;flex-direction:column;gap:10px;
+}
+.material-item{
+  display:flex;align-items:center;gap:14px;
+  border:1.5px solid var(--border);border-radius:12px;
+  padding:14px 16px;text-decoration:none;color:var(--ink);
+  background:var(--bg);transition:border-color .15s,transform .1s;
+}
+.material-item:hover{border-color:var(--rose);transform:translateX(2px);}
+.material-icon{
+  flex:0 0 auto;width:36px;height:36px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:50%;background:#fff;border:1.5px solid var(--border);
+}
+.material-icon svg{width:17px;height:17px;}
+.material-name{font-weight:700;font-size:14.5px;}
+.material-type{
+  font-size:11px;font-weight:700;color:var(--ink-soft);
+  text-transform:uppercase;letter-spacing:.04em;margin-top:2px;
+}
+.empty-state{
+  text-align:center;color:var(--ink-soft);
+  padding:50px 20px;font-size:14px;
+}
+
+/* ── FAB ── */
+.fab-contact{
+  position:fixed;right:20px;bottom:20px;
+  background:var(--rose);color:#fff;border:none;
+  border-radius:30px;padding:13px 20px;
+  font-size:14px;font-weight:800;
+  box-shadow:0 6px 20px rgba(236,72,153,.4);
+  display:flex;align-items:center;gap:8px;z-index:50;
+}
+.fab-contact:hover{background:var(--rose2);}
+
+/* ── MODAL ── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(30,27,46,.5);z-index:100;
+  align-items:center;justify-content:center;padding:20px;
+}
+.modal-overlay.open{display:flex;}
+.modal-box{
+  background:#fff;border-radius:18px;
+  max-width:420px;width:100%;padding:28px;
+  position:relative;box-shadow:0 20px 60px rgba(0,0,0,.2);
+}
+.modal-box h3{font-size:21px;font-weight:800;color:var(--ink);margin-bottom:4px;}
+.modal-box p.sub{color:var(--ink-soft);font-size:13px;margin:0 0 20px;}
+.modal-close{
+  position:absolute;top:14px;right:14px;
+  background:none;border:none;font-size:22px;
+  color:var(--ink-soft);padding:4px;
+}
+textarea{resize:vertical;min-height:88px;}
+.contact-status{font-size:13px;font-weight:700;margin-top:10px;}
+.contact-status.ok{color:#16A34A;}
+.contact-status.err{color:var(--rose2);}
+
+/* ── FOOTER MAIN ── */
+.main-footer{
+  background:var(--bg);border-top:1px solid var(--border);
+  text-align:center;padding:12px;
+  font-size:11px;color:var(--neutral2);flex:0 0 auto;
+}
+.main-footer a{color:var(--rose);text-decoration:none;font-weight:700;}
+.main-footer a:hover{text-decoration:underline;}
+
+@media(max-width:480px){
+  .login-card{padding:32px 20px 26px;}
+  .topbar-left h2{font-size:16px;}
+}
+</style>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-eyebrow">Acceso al curso</div>
+    <h1 class="login-title" id="portal-title">Cronopios en el aula</h1>
+    <p class="login-sub" id="portal-tagline"></p>
+    <div class="field">
+      <label for="curso-select">Curso</label>
+      <select id="curso-select"><option value="">Cargando cursos…</option></select>
+    </div>
+    <div class="field">
+      <label for="pass-input">Contraseña</label>
+      <input type="password" id="pass-input" placeholder="••••••••">
+    </div>
+    <button class="btn-primary" id="login-btn">Ingresar</button>
+    <div class="error-msg" id="login-error"></div>
+    <div class="loading-msg" id="login-loading">Cargando material…</div>
+  </div>
+  <div class="login-quote">
+    "Al fin y al cabo, somos lo que hacemos para cambiar lo que somos."
+  </div>
+  <div class="powered-by">Creado con <a href="#" target="_blank">ProfePanel</a></div>
+</div>
+
+<!-- MAIN -->
+<div id="main-screen">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="label">Curso</div>
+      <h2 id="curso-actual">—</h2>
+    </div>
+    <button class="logout-btn" id="logout-btn">Salir</button>
+  </header>
+  <nav class="tabs-strip" id="tabs-strip"></nav>
+  <main class="content">
+    <div class="material-list" id="material-list"></div>
+  </main>
+  <div class="main-footer">Creado con <a href="#" target="_blank">ProfePanel</a></div>
+  <button class="fab-contact" id="open-contact-btn">✉ Contactá a la profe</button>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="contact-overlay">
+  <div class="modal-box">
+    <button class="modal-close" id="close-contact-btn">&times;</button>
+    <h3>Escribile a la profe</h3>
+    <p class="sub">Tu mensaje llega directo por mail. No necesitás WhatsApp.</p>
+    <div class="field">
+      <label for="contact-name">Tu nombre</label>
+      <input type="text" id="contact-name" placeholder="Nombre y apellido">
+    </div>
+    <div class="field">
+      <label for="contact-email">Tu email (para que te pueda responder)</label>
+      <input type="text" id="contact-email" placeholder="tunombre@gmail.com">
+    </div>
+    <div class="field">
+      <label for="contact-msg">Mensaje</label>
+      <textarea id="contact-msg" placeholder="Escribí tu consulta acá..."></textarea>
+    </div>
+    <button class="btn-primary" id="send-contact-btn">Enviar mensaje</button>
+    <div class="contact-status" id="contact-status"></div>
+  </div>
+</div>
+
+<script>
+const ICONS={
+  pdf:'<svg viewBox="0 0 24 24" fill="none" stroke="#BE185D" stroke-width="2"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6" stroke="#BE185D"/></svg>',
+  imagen:'<svg viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>',
+  video:'<svg viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M10 9l5 3-5 3z" fill="#7C3AED" stroke="none"/></svg>',
+  link:'<svg viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2"><path d="M9 17H7a5 5 0 010-10h2"/><path d="M15 7h2a5 5 0 010 10h-2"/><line x1="8" y1="12" x2="16" y2="12"/></svg>'
+};
+function iconFor(t){
+  t=(t||'').toLowerCase().trim();
+  if(t.includes('pdf')) return ICONS.pdf;
+  if(t.includes('imagen')||t.includes('foto')) return ICONS.imagen;
+  if(t.includes('video')||t.includes('youtube')) return ICONS.video;
+  return ICONS.link;
+}
+
+let ALL_ROWS=[],CURRENT_CURSO=null,CURRENT_ROWS=[],CURRENT_FOLDER=null;
+
+document.getElementById('portal-title').textContent=CONFIG.TITULO_PORTAL;
+document.getElementById('portal-tagline').textContent=CONFIG.TAGLINE_PORTAL;
+document.getElementById('open-contact-btn').textContent='✉ '+CONFIG.BOTON_CONTACTO;
+
+function cargarPlanilla(){
+  Papa.parse(CONFIG.SHEET_CSV_URL,{
+    download:true,header:true,skipEmptyLines:true,
+    complete(results){
+      ALL_ROWS=results.data.map(r=>({
+        curso:(r['Curso']||'').trim(),
+        carpeta:(r['CarpetaTema']||'Sin carpeta').trim(),
+        nombre:(r['NombreMaterial']||'Material').trim(),
+        tipo:(r['Tipo']||'Link').trim(),
+        url:(r['URL']||'').trim(),
+        password:(r['Password']||'').trim()
+      })).filter(r=>r.curso&&r.url);
+      const cursos=[...new Set(ALL_ROWS.map(r=>r.curso))].sort();
+      const sel=document.getElementById('curso-select');
+      sel.innerHTML='<option value="">Elegí tu curso…</option>'+
+        cursos.map(c=>`<option value="${c.replace(/"/g,'&quot;')}">${c}</option>`).join('');
+      document.getElementById('login-loading').style.display='none';
+    },
+    error(){
+      document.getElementById('login-loading').style.display='none';
+      document.getElementById('login-error').textContent='No se pudo cargar el material. Avisale a la profe.';
+    }
+  });
+}
+cargarPlanilla();
+
+document.getElementById('login-btn').addEventListener('click',intentarLogin);
+document.getElementById('pass-input').addEventListener('keydown',e=>{if(e.key==='Enter')intentarLogin();});
+
+function intentarLogin(){
+  const curso=document.getElementById('curso-select').value;
+  const pass=document.getElementById('pass-input').value.trim();
+  const err=document.getElementById('login-error');
+  err.textContent='';
+  if(!curso){err.textContent='Elegí un curso.';return;}
+  if(!pass){err.textContent='Ingresá la contraseña.';return;}
+  const rc=ALL_ROWS.filter(r=>r.curso===curso);
+  if(!rc.some(r=>r.password.toLowerCase()===pass.toLowerCase())){
+    err.textContent='Contraseña incorrecta para ese curso.';return;
+  }
+  CURRENT_CURSO=curso;CURRENT_ROWS=rc;
+  sessionStorage.setItem('pp_curso',curso);
+  sessionStorage.setItem('pp_pass',pass);
+  mostrarMain();
+}
+
+function mostrarMain(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('main-screen').classList.add('visible');
+  document.getElementById('curso-actual').textContent=CURRENT_CURSO;
+  const carpetas=[...new Set(CURRENT_ROWS.map(r=>r.carpeta))];
+  CURRENT_FOLDER=carpetas[0]||null;
+  renderTabs(carpetas);renderMateriales();
+}
+
+function renderTabs(carpetas){
+  const strip=document.getElementById('tabs-strip');
+  strip.innerHTML=carpetas.map(c=>
+    `<button class="tab-folder ${c===CURRENT_FOLDER?'active':''}" data-folder="${c.replace(/"/g,'&quot;')}">${c}</button>`
+  ).join('');
+  strip.querySelectorAll('.tab-folder').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      CURRENT_FOLDER=btn.dataset.folder;
+      strip.querySelectorAll('.tab-folder').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');renderMateriales();
+    });
+  });
+}
+
+function renderMateriales(){
+  const list=document.getElementById('material-list');
+  const items=CURRENT_ROWS.filter(r=>r.carpeta===CURRENT_FOLDER);
+  if(!items.length){list.innerHTML='<div class="empty-state">Todavía no hay material acá.</div>';return;}
+  list.innerHTML=items.map(it=>`
+    <a class="material-item" href="${it.url}" target="_blank" rel="noopener">
+      <span class="material-icon">${iconFor(it.tipo)}</span>
+      <span>
+        <div class="material-name">${it.nombre}</div>
+        <div class="material-type">${it.tipo}</div>
+      </span>
+    </a>`).join('');
+}
+
+document.getElementById('logout-btn').addEventListener('click',()=>{
+  sessionStorage.removeItem('pp_curso');sessionStorage.removeItem('pp_pass');
+  CURRENT_CURSO=null;CURRENT_ROWS=[];
+  document.getElementById('main-screen').classList.remove('visible');
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('pass-input').value='';
+});
+
+window.addEventListener('load',()=>{
+  const sc=sessionStorage.getItem('pp_curso'),sp=sessionStorage.getItem('pp_pass');
+  if(sc&&sp){
+    const t=setInterval(()=>{
+      if(ALL_ROWS.length>0){
+        clearInterval(t);
+        const rc=ALL_ROWS.filter(r=>r.curso===sc);
+        if(rc.some(r=>r.password.toLowerCase()===sp.toLowerCase())){
+          CURRENT_CURSO=sc;CURRENT_ROWS=rc;
+          document.getElementById('curso-select').value=sc;
+          mostrarMain();
+        }
+      }
+    },150);
+  }
+});
+
+if(CONFIG.EMAILJS_PUBLIC_KEY&&!CONFIG.EMAILJS_PUBLIC_KEY.startsWith('PEGAR_')){
+  emailjs.init({publicKey:CONFIG.EMAILJS_PUBLIC_KEY});
+}
+const overlay=document.getElementById('contact-overlay');
+document.getElementById('open-contact-btn').addEventListener('click',()=>{
+  overlay.classList.add('open');document.getElementById('contact-status').textContent='';
+});
+document.getElementById('close-contact-btn').addEventListener('click',()=>overlay.classList.remove('open'));
+overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.classList.remove('open');});
+
+document.getElementById('send-contact-btn').addEventListener('click',()=>{
+  const nombre=document.getElementById('contact-name').value.trim();
+  const emailEst=document.getElementById('contact-email').value.trim();
+  const mensaje=document.getElementById('contact-msg').value.trim();
+  const status=document.getElementById('contact-status');
+  if(!mensaje){status.className='contact-status err';status.textContent='Escribí un mensaje.';return;}
+  status.className='contact-status';status.textContent='Enviando…';
+  emailjs.send(CONFIG.EMAILJS_SERVICE_ID,CONFIG.EMAILJS_TEMPLATE_ID,{
+    from_name:nombre||'Estudiante sin nombre',
+    curso:CURRENT_CURSO||'No identificado',
+    message:mensaje,
+    reply_to:emailEst||'sin-email@no-respondido.com'
+  }).then(()=>{
+    status.className='contact-status ok';
+    status.textContent='¡Mensaje enviado! La profe te va a responder por mail.';
+    document.getElementById('contact-msg').value='';
+    document.getElementById('contact-email').value='';
+    document.getElementById('contact-name').value='';
+  }).catch(()=>{
+    status.className='contact-status err';
+    status.textContent='No se pudo enviar. Probá de nuevo en un momento.';
+  });
+});
+</script>
+</body>
+</html>
